@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat AI</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background 0.3s ease;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 420px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .chat-header {
+            background: rgb(83, 132, 181);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .chat-box {
+            flex-grow: 1;
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f9f9f9;
+            transition: background 0.3s ease;
+            justify-content: center; /* Center content vertically */
+        }
+
+        @media (max-width: 600px) {
+            .chat-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            box-shadow: none;
+            }
+
+            .p1 {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 10px;
+            }
+
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+            border-bottom-right-radius: 3px;
+        }
+
+        .bot-message {
+            background: #e0e0e0;
+            color: black;
+            align-self: flex-start;
+            border-bottom-left-radius: 3px;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #ddd;
+            transition: background 0.3s ease;
+        }
+        .input-area input {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            background: #f0f0f0;
+            transition: all 0.3s ease;
+        }
+        .input-area input:focus {
+            padding: 20px;
+            font-size: 15px;
+        }
+        .input-area button {
+            background: #6e8efb;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: #1a202c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .container {
+            display: flex;
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            position: relative;
+        }
+        .letter {
+            transition: transform 1s ease-in-out;
+            position: relative;
+        }
+
+        /* Animasi Fade-Out */
+        .fade-out {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        #main-content {
+            display: none;
+        }
+
+        #chat-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            height: 400px;
+            background-color: white;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: none;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        
+        /* Tambahkan class untuk efek animasi */
+        .show-chat {
+            display: block !important;
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: black;
+            transition: opacity 2s ease-in-out;
+            z-index: 9999;
+        }
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .quantum-orbs {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+        .orb {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: cyan;
+            border-radius: 50%;
+            animation: quantumDance 1.5s infinite ease-in-out;
+        }
+        .orb:nth-child(2) { animation-delay: 0.3s; }
+        .orb:nth-child(3) { animation-delay: 0.6s; }
+        @keyframes quantumDance {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(calc(100px - 50%), calc(100px - 50%)) scale(1.5);
+                opacity: 0.3;
+            }
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background: #121212;
+        }
+        .chat-container.dark-mode {
+            background: #1e1e1e;
+            color: white;
+        }
+        .chat-header.dark-mode {
+            background: #333;
+            color: white;
+        }
+        .chat-box.dark-mode {
+            background: #1e1e1e;
+        }
+        .input-area.dark-mode {
+            background: #333;
+        }
+        .input-area input.dark-mode {
+            background: #444;
+            color: white;
+        }
+        .input-area button.dark-mode {
+            background: #555;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px; /* Increased width */
+            height: 30px; /* Increased height */
+            background: #ddd;
+            border-radius: 30px; /* Adjusted border-radius */
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 0 auto; /* Center horizontally */
+        }
+        .toggle-switch::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 5px;
+            transform: translateY(-50%);
+            transition: all 0.3s;
+        }
+        .toggle-switch.active {
+            background: black;
+        }
+        .toggle-switch.active::before {
+            left: 25px;
+        }
+
+        /* Dark mode h3 color */
+        h3.dark-mode {
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+<!-- loading screen -->
+<div class="loading-screen" id="loading-screen">
+    <div class="quantum-orbs">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+</div>
+
+    <!-- main website -->
+        <div class="chat-container">
+            <div class="chat-header">AI by @mhdprawiraa</div>
+            <div class="chat-box" id="chatBox"></div>
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Tulis pesan...">
+                <button onclick="sendMessage()">Kirim</button>
+            </div> 
+            </div>
+            <div class="p1" id="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <div style="flex-grow: 1;"></div>
+                <div style="text-align: center; margin-left: 20px;">
+                    <h3 id="toggleMode"">LIGHT MODE</h3>
+                    <div class="toggle-switch" id="toggleSwitch" onclick="toggleSwitch()"></div> 
+                </div>
+            </div>
+        
+  
+    <script>
+        const letters = document.querySelectorAll(".letter");
+        let scattered = false;
+
+        function scatterLetters() {
+            letters.forEach(letter => {
+                const x = Math.random() * 200 - 100;
+                const y = Math.random() * 200 - 100;
+                letter.style.transform = scattered ? "translate(0, 0)" : `translate(${x}px, ${y}px)`;
+            });
+            scattered = !scattered;
+        }
+
+        setInterval(scatterLetters, 2000);
+
+        window.addEventListener("load", function () {
+            setTimeout(() => {
+                document.getElementById("loading-screen").classList.add("fade-out");
+                setTimeout(() => {
+                    document.getElementById("loading-screen").style.display = "none";
+                    document.getElementById("main-content").style.display = "block";
+                }, 3000); // Sesuai dengan durasi fade-out
+            }, 7000); // Loading berjalan selama 3 detik
+        });
+    </script>
+
+    <script>
+        window.addEventListener("load", function () {
+            setTimeout(() => {
+                document.getElementById("chat-box").classList.add("show-chat");
+            }, 3500); // Muncul setelah loading screen selesai
+        });
+        
+    </script>
+
+    <script>
+        const apiKey = "AIzaSyA4aZob7d8hnHCA4b8QylxulZRxcXED5WA"; // Ganti dengan API Key kamu
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        function generatePrompt(userMessage) {
+            return `
+                Kamu adalah seorang pendengar yang baik dan suportif. Setiap kali seseorang berbagi cerita atau curhat, kamu harus mendengarkan dengan empati, memberikan respons yang sesuai dengan apa yang mereka katakan, tanpa mengulang-ulang kata atau memberikan jawaban yang bertele-tele. Kamu tidak mengalihkan topik kecuali pengguna sendiri yang menggantinya. Kamu memberikan dukungan emosional yang tulus, tanpa menyuruh mereka melakukan sesuatu kecuali mereka meminta saran. 
+                Pastikan percakapan mengalir alami dan berkelanjutan, sehingga pengguna merasa nyaman untuk terus berbicara tanpa merasa dihakimi
+                
+                User: "${userMessage}"
+                Wora AI: 
+            `;
+        }
+
+        async function getGeminiResponse(userMessage) {
+            const prompt = generatePrompt(userMessage);
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+
+                if (data.candidates && data.candidates.length > 0) {
+                    return data.candidates[0].content.parts[0].text;
+                } else {
+                    console.error("Format respons tidak sesuai:", data);
+                    return "Maaf, aku kurang paham. Tapi aku selalu ada buat mendengarkan kamu. ❤️";
+                }
+
+            } catch (error) {
+                console.error("Error mengambil respons AI:", error);
+                return "Maaf, terjadi kesalahan. Tapi jangan khawatir, aku tetap di sini buat kamu. 🤗";
+            }
+        }
+
+        async function sendMessage() {
+            const userInput = document.getElementById("userInput").value.trim();
+            if (userInput === "") return;
+
+            appendMessage("Kamu", userInput, true);
+            document.getElementById("userInput").value = "";
+
+            // Tambahkan indikator mengetik
+            const typingIndicator = document.createElement("div");
+            typingIndicator.classList.add("message", "bot-message", "typing");
+            typingIndicator.innerText = "Wora AI sedang mengetik...";
+            document.getElementById("chatBox").appendChild(typingIndicator);
+            document.getElementById("chatBox").scrollTop = document.getElementById("chatBox").scrollHeight;
+
+            // Dapatkan respons AI dengan delay seolah AI berpikir
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const aiResponse = await getGeminiResponse(userInput);
+
+            // Hapus indikator mengetik setelah mendapatkan respons
+            typingIndicator.remove();
+
+            // Tampilkan pesan dengan efek mengetik
+            typeMessage("Wora AI", aiResponse, false);
+        }
+
+        function appendMessage(sender, message, isUser) {
+            const chatBox = document.getElementById("chatBox");
+            const msgElement = document.createElement("div");
+            msgElement.classList.add("message", isUser ? "user-message" : "bot-message");
+            msgElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatBox.appendChild(msgElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function typeMessage(sender, message, isUser) {
+            const chatBox = document.getElementById("chatBox");
+            const msgElement = document.createElement("div");
+            msgElement.classList.add("message", isUser ? "user-message" : "bot-message");
+
+            // Buat span unik untuk setiap pesan
+            const textSpan = document.createElement("span");
+            msgElement.innerHTML = `<strong>${sender}:</strong> `;
+            msgElement.appendChild(textSpan);
+
+            chatBox.appendChild(msgElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            let index = 0;
+            function type() {
+                if (index < message.length) {
+                    textSpan.innerHTML += message[index];
+                    index++;
+                    setTimeout(type, Math.random() * 50 + 20); // Kecepatan mengetik lebih dinamis
+                }
+            }
+            type();
+        }
+
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+        function toggleSwitch() {
+
+            let toggle = document.getElementById("toggleSwitch");
+            toggle.classList.toggle("active");
+
+            const body = document.body;
+            const chatContainer = document.querySelector('.chat-container');
+            const chatHeader = document.querySelector('.chat-header');
+            const chatBox = document.querySelector('.chat-box');
+            const inputArea = document.querySelector('.input-area');
+            const input = document.querySelector('.input-area input');
+            const button = document.querySelector('.input-area button');
+            const toggleButton = document.getElementById('toggleMode');
+
+            body.classList.toggle('dark-mode');
+            chatContainer.classList.toggle('dark-mode');
+            chatHeader.classList.toggle('dark-mode');
+            chatBox.classList.toggle('dark-mode');
+            inputArea.classList.toggle('dark-mode');
+            input.classList.toggle('dark-mode');
+            button.classList.toggle('dark-mode');
+            toggleButton.classList.toggle('dark-mode');
+
+            if (body.classList.contains('dark-mode')) {
+                toggleButton.textContent = 'DARK MODE';
+            } else {
+                toggleButton.textContent = 'LIGHT MODE';
+            }
+        }
+
+        
+            
+    </script>
+
+    <script>
+    document.getElementById("userInput").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {  
+            event.preventDefault(); // Mencegah default behavior (terutama di form)
+            sendMessage(); // Panggil fungsi kirim pesan
+        }
+    });
+</script>
+
+<script>
+    setTimeout(() => {
+        document.getElementById("loading-screen").classList.add("fade-out");
+        setTimeout(() => {
+            document.getElementById("loading-screen").style.display = "none";
+            document.getElementById("main-content").style.display = "block";
+        }, 2000);
+    }, 4000);
+</script>
+
+
+
+</body>
+</html>
